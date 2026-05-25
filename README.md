@@ -1,8 +1,8 @@
 # Photo to Braille ASCII Art
 
-![Python](https://img.shields.io/badge/python-3.6+-blue.svg)
-![Pillow](https://img.shields.io/badge/Pillow-powered-green.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Python](https://img.shields.io/badge/python-3.6+-white.svg)
+![Pillow](https://img.shields.io/badge/Pillow-powered-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-red.svg)
 
 Converts any image into Braille Unicode ASCII art. Each Braille character represents a 2×4 pixel block, creating detailed terminal-friendly art.
 
