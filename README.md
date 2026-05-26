@@ -1,17 +1,38 @@
 # Photo to Braille ASCII Art
 
-![Python](https://img.shields.io/badge/python-3.6+-white.svg)
-![Pillow](https://img.shields.io/badge/Pillow-powered-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-red.svg)
+![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
+![Pillow](https://img.shields.io/badge/Pillow-powered-green.svg)
+![CustomTkinter](https://img.shields.io/badge/CustomTkinter-UI-orange.svg)
 
-Converts any image into Braille Unicode ASCII art. Each Braille character represents a 2×4 pixel block, creating detailed terminal-friendly art.
+Converts any image into Braille Unicode ASCII art. Each Braille character (U+2800–U+28FF) represents a 2×4 pixel block with per-dot thresholding, preserving gradients, shadows, and fine detail.
+
+## Features
+
+- **Full Braille matrix** — all 256 patterns used for smooth gradients
+- **Desktop GUI** — custom dark theme (music-player aesthetic), album-art preview
+- **CLI scripts** — both original and improved engine included
+- **Aspect ratio correction** — compensates for Braille cell vertical stretch
+- **No regular spaces** — empty cells use U+2800 (Braille blank), all rows equal-width
+
+## GUI
+
+```bash
+pip install -r requirements.txt
+python gui.py
+```
+
+- Left panel: settings (width slider, sensitivity, invert toggle)
+- Right panel: image preview (click to select/replace), filename, resolution, file size
+- Convert button saves `*_braille.txt` with full Braille art
+- Save directory picker, status bar
 
 ## Scripts
 
 | Script | Description |
 |---|---|
-| `photo_to_braille.py` | Original version — adaptive threshold (25th percentile), fixed width 60 |
-| `photo_to_ascii.py` | Improved version — sensitivity control, mean-based threshold, replaces empty Braille with space (removes noise bands), higher default width 120 |
+| `gui.py` | Desktop GUI (CustomTkinter + Pillow) |
+| `photo_to_ascii.py` | CLI — mean-threshold, sensitivity control, full DOT_MAP engine |
+| `photo_to_braille.py` | CLI — percentile-threshold, same engine |
 
 ## Example
 
@@ -19,40 +40,48 @@ Converts any image into Braille Unicode ASCII art. Each Braille character repres
 
 
 
-## Usage
+## Example
 
-### photo_to_braille.py (original)
+![Mavashi](mavashi.png)
 
-```bash
-pip install Pillow
-python photo_to_braille.py path/to/image.jpg
-```
-
-Output is printed to console and saved to `braille_art.txt`.
-
-| Argument | Description |
-|---|---|
-| `path` | Path to image (optional — prompts if omitted) |
-| `width` | Braille character width (default: 60) — edit in `image_to_braille()` |
-
-### photo_to_ascii.py (improved)
+## Scripts
 
 ```bash
 python photo_to_ascii.py
-# Then enter the path when prompted
+# Enter path when prompted
 ```
 
-Features:
-- Higher default resolution (width=120)
-- `sensitivity` parameter (0.5–1.5) to control line thickness
-- Replaces empty Braille blocks with spaces — removes vertical banding
-- Mean-based adaptive threshold
+| Parameter | Default |
+|---|---|
+| `width` | 120 |
+| `sensitivity` | 1.0 (0.5–1.5) |
+
+### photo_to_braille.py (CLI)
+
+```bash
+python photo_to_braille.py path/to/image.jpg
+```
+
+Fixed width 60, percentile-based threshold.
 
 ## How it works
 
-1. Image is converted to grayscale and resized to `width × 2` pixels wide
-2. Height is adjusted to maintain aspect ratio (rounded to multiple of 4)
-3. Each 2×4 pixel block is mapped to a Braille Unicode character (U+2800–U+28FF)
-4. Adaptive thresholding determines black/white cutoff
+1. Image is grayscaled and resized to `width × 2` pixels wide
+2. Height = `pixel_w × aspect × 0.72` — compensates Braille cell shape (2:1 font aspect)
+3. Each 2×4 pixel block → one Braille char via `DOT_MAP` (per-pixel dot bit)
+4. Empty cells → U+2800 (Braille blank), ensuring uniform line widths
+5. Output saved as UTF-8 `.txt`, renderable in any monospace font
 
-No external dependencies beyond Pillow.
+```
+Uses up to 147/256 Braille patterns on typical photos — smooth gradients, no banding.
+```
+
+## Requirements
+
+- Python 3.8+
+- Pillow
+- customtkinter (for GUI)
+
+## Roadmap
+
+- Standalone `.exe` build (no Python required)

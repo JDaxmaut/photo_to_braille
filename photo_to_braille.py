@@ -1,55 +1,52 @@
 from PIL import Image
 
-BRAILLE_BITS = [
-    0x01, 0x02, 0x04, 0x40,
-    0x08, 0x10, 0x20, 0x80,
+DOT_MAP = [
+    (0, 0),
+    (1, 0),
+    (2, 0),
+    (0, 1),
+    (1, 1),
+    (2, 1),
+    (3, 0),
+    (3, 1),
 ]
 
 BRAILLE_BASE = 0x2800
 
 
-def pixels_to_braille(block, threshold):
-    code = BRAILLE_BASE
-    for i, val in enumerate(block):
-        if val < threshold:
-            code |= BRAILLE_BITS[i]
-    return chr(code)
-
-
-def image_to_braille(image_path, width=60):
+def image_to_braille(image_path, width=60, threshold=None):
     img = Image.open(image_path).convert("L")
 
-    braille_w = width
-    img_w = braille_w * 2
-    aspect_ratio = img.height / img.width
-    img_h = int(img_w * aspect_ratio)
-    img_h = (img_h + 3) // 4 * 4
-    img = img.resize((img_w, img_h))
+    pixel_w = width * 2
+    aspect = img.height / img.width
+    pixel_h = int(pixel_w * aspect * 0.72)
+    pixel_h = (pixel_h + 3) // 4 * 4
+    img = img.resize((pixel_w, pixel_h))
 
-    pixels = list(img.getdata())
+    px = list(img.getdata())
 
-    sorted_pixels = sorted(pixels)
-    threshold = sorted_pixels[len(sorted_pixels) // 4]
-    threshold = min(255, int(threshold * 1.2))
+    if threshold is None:
+        sorted_px = sorted(px)
+        threshold = sorted_px[len(sorted_px) // 4]
+        threshold = min(255, int(threshold * 1.2))
 
-    result = []
+    out = []
 
-    for y in range(0, img_h, 4):
-        line = []
-        for x in range(0, img_w, 2):
-            block = []
-            for dy in range(4):
-                for dx in range(2):
-                    px = x + dx
-                    py = y + dy
-                    if px < img_w and py < img_h:
-                        block.append(pixels[py * img_w + px])
-                    else:
-                        block.append(255)
-            line.append(pixels_to_braille(block, threshold))
-        result.append("".join(line))
+    for y in range(0, pixel_h, 4):
+        row = []
+        for x in range(0, pixel_w, 2):
+            code = BRAILLE_BASE
 
-    return "\n".join(result)
+            for i, (dr, dc) in enumerate(DOT_MAP):
+                idx = (y + dr) * pixel_w + (x + dc)
+                if idx < len(px) and px[idx] < threshold:
+                    code |= (1 << i)
+
+            row.append(chr(code))
+
+        out.append("".join(row))
+
+    return "\n".join(out)
 
 
 if __name__ == "__main__":
@@ -62,6 +59,6 @@ if __name__ == "__main__":
 
         with open("braille_art.txt", "w", encoding="utf-8") as f:
             f.write(result)
-        print(f"\nSaved to braille_art.txt")
+        print("\nSaved to braille_art.txt")
     except Exception as e:
         print(f"Error: {e}")

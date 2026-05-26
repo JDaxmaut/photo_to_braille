@@ -1,3 +1,9 @@
 __pycache__/
+*.pyc
 braille_art.txt
 braille_ascii_out.txt
+*_braille.txt
+test_gui.py
+PhotoToBraille.exe
+build_temp/
+*.spec
