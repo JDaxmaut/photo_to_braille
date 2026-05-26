@@ -38,12 +38,6 @@ python gui.py
 
 ![Mavashi](mavashi.png)
 
-
-
-## Example
-
-![Mavashi](mavashi.png)
-
 ## Scripts
 
 ```bash
